@@ -18,8 +18,11 @@ type RandomLoadBalance struct {
 
 func NewRandomLoadBalance() *RandomLoadBalance {
 	return &RandomLoadBalance{
-		rand:            rand.New(rand.NewSource(time.Now().UnixNano())),
-		BaseLoadBalance: BaseLoadBalance{Compare: DefaultCompare, lock: &DummyLocker{}},
+		rand: rand.New(rand.NewSource(time.Now().UnixNano())),
+		BaseLoadBalance: BaseLoadBalance{
+			Compare:         DefaultCompare,
+			LockLoadBalance: LockLoadBalance{&DummyLocker{}},
+		},
 	}
 }
 
@@ -38,20 +41,17 @@ func (lb *RandomLoadBalance) Select(ctx context.Context) interface{} {
 type RandomWeightLoadBalance struct {
 	invokers map[interface{}]int
 	total    int
-	lock     RWLocker
 	rand     *rand.Rand
+
+	LockLoadBalance
 }
 
 func NewRandomWeightLoadBalance() *RandomWeightLoadBalance {
 	return &RandomWeightLoadBalance{
-		invokers: map[interface{}]int{},
-		rand:     rand.New(rand.NewSource(time.Now().UnixNano())),
-		lock:     &DummyLocker{},
+		invokers:        map[interface{}]int{},
+		rand:            rand.New(rand.NewSource(time.Now().UnixNano())),
+		LockLoadBalance: LockLoadBalance{&DummyLocker{}},
 	}
-}
-
-func (lb *RandomWeightLoadBalance) WithLocker(locker RWLocker) {
-	lb.lock = locker
 }
 
 func (lb *RandomWeightLoadBalance) Add(weight interface{}, invoker interface{}) {

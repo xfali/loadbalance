@@ -14,8 +14,11 @@ type RoundRobbinLoadBalance struct {
 
 func NewRoundRobbinLoadBalance() *RoundRobbinLoadBalance {
 	return &RoundRobbinLoadBalance{
-		i:               0,
-		BaseLoadBalance: BaseLoadBalance{Compare: DefaultCompare, lock: &DummyLocker{}},
+		i: 0,
+		BaseLoadBalance: BaseLoadBalance{
+			Compare:         DefaultCompare,
+			LockLoadBalance: LockLoadBalance{&DummyLocker{}},
+		},
 	}
 }
 
@@ -41,19 +44,16 @@ type weightInvoker struct {
 
 type RoundRobbinWeightLoadBalance struct {
 	invokers []weightInvoker
-	lock     RWLocker
 	Compare  Compare
+
+	LockLoadBalance
 }
 
 func NewRoundRobbinWeightLoadBalance() *RoundRobbinWeightLoadBalance {
 	return &RoundRobbinWeightLoadBalance{
-		lock:    &DummyLocker{},
-		Compare: DefaultCompare,
+		LockLoadBalance: LockLoadBalance{&DummyLocker{}},
+		Compare:         DefaultCompare,
 	}
-}
-
-func (lb *RoundRobbinWeightLoadBalance) WithLocker(locker RWLocker) {
-	lb.lock = locker
 }
 
 func (lb *RoundRobbinWeightLoadBalance) Add(weight interface{}, invoker interface{}) {

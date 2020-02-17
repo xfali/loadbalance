@@ -34,13 +34,18 @@ type LoadBalance interface {
 	WithLocker(RWLocker)
 }
 
-type BaseLoadBalance struct {
-	invokers []interface{}
-	Compare  Compare
+type LockLoadBalance struct {
 	lock     RWLocker
 }
 
-func (lb *BaseLoadBalance) WithLocker(locker RWLocker) {
+type BaseLoadBalance struct {
+	invokers []interface{}
+	Compare  Compare
+
+	LockLoadBalance
+}
+
+func (lb *LockLoadBalance) WithLocker(locker RWLocker) {
 	lb.lock = locker
 }
 

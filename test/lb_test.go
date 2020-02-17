@@ -52,6 +52,9 @@ func TestRRWeightLB(t *testing.T) {
 			}
 		}
 		t.Logf("a: %d b: %d c: %d\n", a, b, c)
+		if a != 2 || b != 5 || c != 10 {
+			t.Fatal()
+		}
 	})
 
 	t.Run("rr weight remove", func(t *testing.T) {
@@ -73,6 +76,9 @@ func TestRRWeightLB(t *testing.T) {
 			}
 		}
 		t.Logf("a: %d b: %d c: %d\n", a, b, c)
+		if a != 2 || b != 0 || c != 10 {
+			t.Fatal()
+		}
 	})
 }
 
@@ -96,6 +102,9 @@ func TestRandomLB(t *testing.T) {
 		}
 
 		t.Logf("a: %d b: %d c: %d\n", a, b, c)
+		if (900 > a || a > 1100) || (900 > b || b > 1100) || (900 > c || c > 1100) {
+			t.Fatal()
+		}
 	})
 
 	t.Run("random remove", func(t *testing.T) {
@@ -118,6 +127,9 @@ func TestRandomLB(t *testing.T) {
 		}
 
 		t.Logf("a: %d b: %d c: %d\n", a, b, c)
+		if (900 > a || a > 1100) || b != 0 || (900 > c || c > 1100) {
+			t.Fatal()
+		}
 	})
 }
 
@@ -141,6 +153,9 @@ func TestRandomWeightLB(t *testing.T) {
 		}
 
 		t.Logf("a: %d b: %d c: %d\n", a, b, c)
+		if (1900 > a || a > 2100) || (4900 > b || b > 5100) || (9900 > c || c > 11000) {
+			t.Fatal()
+		}
 	})
 
 	t.Run("random weight remove", func(t *testing.T) {
@@ -163,5 +178,8 @@ func TestRandomWeightLB(t *testing.T) {
 		}
 
 		t.Logf("a: %d b: %d c: %d\n", a, b, c)
+		if (1900 > a || a > 2100) || b != 0 || (9900 > c || c > 11000) {
+			t.Fatal()
+		}
 	})
 }
