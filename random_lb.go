@@ -6,6 +6,7 @@
 package loadbalance
 
 import (
+	"context"
 	"math/rand"
 	"time"
 )
@@ -22,7 +23,7 @@ func NewRandomLoadBalance() *RandomLoadBalance {
 	}
 }
 
-func (lb *RandomLoadBalance) Select() interface{} {
+func (lb *RandomLoadBalance) Select(ctx context.Context) interface{} {
 	lb.lock.RLock()
 	defer lb.lock.RUnlock()
 
@@ -35,15 +36,15 @@ func (lb *RandomLoadBalance) Select() interface{} {
 }
 
 type RandomWeightLoadBalance struct {
-	invokers map[interface{}]uint
-	total    uint
+	invokers map[interface{}]int
+	total    int
 	lock     RWLocker
 	rand     *rand.Rand
 }
 
 func NewRandomWeightLoadBalance() *RandomWeightLoadBalance {
 	return &RandomWeightLoadBalance{
-		invokers: map[interface{}]uint{},
+		invokers: map[interface{}]int{},
 		rand:     rand.New(rand.NewSource(time.Now().UnixNano())),
 		lock:     &DummyLocker{},
 	}
@@ -53,12 +54,12 @@ func (lb *RandomWeightLoadBalance) WithLocker(locker RWLocker) {
 	lb.lock = locker
 }
 
-func (lb *RandomWeightLoadBalance) Add(weight uint, invoker interface{}) {
+func (lb *RandomWeightLoadBalance) Add(weight interface{}, invoker interface{}) {
 	lb.lock.Lock()
 	defer lb.lock.Unlock()
 
-	lb.invokers[invoker] = weight
-	lb.total += weight
+	lb.invokers[invoker] = weight.(int)
+	lb.total += weight.(int)
 }
 
 func (lb *RandomWeightLoadBalance) Remove(invoker interface{}) {
@@ -71,15 +72,15 @@ func (lb *RandomWeightLoadBalance) Remove(invoker interface{}) {
 	}
 }
 
-func (lb *RandomWeightLoadBalance) Select() interface{} {
+func (lb *RandomWeightLoadBalance) Select(ctx context.Context) interface{} {
 	lb.lock.RLock()
 	defer lb.lock.RUnlock()
 
 	if len(lb.invokers) == 0 {
 		return nil
 	}
-	var cur uint = 0
-	r := uint(lb.rand.Uint64() % uint64(lb.total))
+	var cur int = 0
+	r := int(lb.rand.Uint64() % uint64(lb.total))
 	for k, v := range lb.invokers {
 		if cur <= r && r < cur+v {
 			return k

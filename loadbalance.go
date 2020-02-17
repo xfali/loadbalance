@@ -6,6 +6,7 @@
 package loadbalance
 
 import (
+	"context"
 	"reflect"
 	"sync"
 )
@@ -21,8 +22,14 @@ type RWLocker interface {
 }
 
 type LoadBalance interface {
+	//增加一个invoker
+	//
+	//factor影响选择的因素,不同的实现该类型不一致: 如带权值负载均，weight类型为int
+	Add(factor interface{}, invoker interface{})
+	//从记录中删除，不会再次被选中
+	Remove(invoker interface{})
 	//选择invoker
-	Select() interface{}
+	Select(ctx context.Context) interface{}
 	//设置锁
 	WithLocker(RWLocker)
 }
@@ -37,7 +44,14 @@ func (lb *BaseLoadBalance) WithLocker(locker RWLocker) {
 	lb.lock = locker
 }
 
-func (lb *BaseLoadBalance) Add(invokers ...interface{}) {
+func (lb *BaseLoadBalance) Add(factor interface{}, invoker interface{}) {
+	lb.lock.Lock()
+	defer lb.lock.Unlock()
+
+	lb.invokers = append(lb.invokers, invoker)
+}
+
+func (lb *BaseLoadBalance) AddInvokers(invokers ...interface{}) {
 	lb.lock.Lock()
 	defer lb.lock.Unlock()
 

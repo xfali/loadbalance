@@ -13,22 +13,22 @@ import (
 func TestRRLB(t *testing.T) {
 	t.Run("rr", func(t *testing.T) {
 		lb := loadbalance.NewRoundRobbinLoadBalance()
-		lb.Add("a")
-		lb.Add("b")
-		lb.Add("c")
+		lb.Add(nil, "a")
+		lb.Add(nil, "b")
+		lb.Add(nil, "c")
 		for i := 0; i < 10; i++ {
-			t.Log(lb.Select())
+			t.Log(lb.Select(nil))
 		}
 	})
 
 	t.Run("rr remove", func(t *testing.T) {
 		lb := loadbalance.NewRoundRobbinLoadBalance()
-		lb.Add("a")
-		lb.Add("b")
-		lb.Add("c")
+		lb.Add(nil, "a")
+		lb.Add(nil, "b")
+		lb.Add(nil, "c")
 		lb.Remove("b")
 		for i := 0; i < 10; i++ {
-			t.Log(lb.Select())
+			t.Log(lb.Select(nil))
 		}
 	})
 }
@@ -41,7 +41,7 @@ func TestRRWeightLB(t *testing.T) {
 		lb.Add(10, "c")
 		a, b, c := 0, 0, 0
 		for i := 0; i < 17; i++ {
-			v := lb.Select()
+			v := lb.Select(nil)
 			t.Log(v)
 			if v.(string) == "a" {
 				a++
@@ -62,7 +62,7 @@ func TestRRWeightLB(t *testing.T) {
 		lb.Remove("b")
 		a, b, c := 0, 0, 0
 		for i := 0; i < 12; i++ {
-			v := lb.Select()
+			v := lb.Select(nil)
 			t.Log(v)
 			if v.(string) == "a" {
 				a++
@@ -79,12 +79,12 @@ func TestRRWeightLB(t *testing.T) {
 func TestRandomLB(t *testing.T) {
 	t.Run("random", func(t *testing.T) {
 		lb := loadbalance.NewRandomLoadBalance()
-		lb.Add("a")
-		lb.Add("b")
-		lb.Add("c")
+		lb.Add(nil, "a")
+		lb.Add(nil, "b")
+		lb.Add(nil, "c")
 		a, b, c := 0, 0, 0
 		for i := 0; i < 3000; i++ {
-			v := lb.Select()
+			v := lb.Select(nil)
 			//t.Log(v)
 			if v.(string) == "a" {
 				a++
@@ -100,13 +100,13 @@ func TestRandomLB(t *testing.T) {
 
 	t.Run("random remove", func(t *testing.T) {
 		lb := loadbalance.NewRandomLoadBalance()
-		lb.Add("a")
-		lb.Add("b")
-		lb.Add("c")
+		lb.Add(nil, "a")
+		lb.Add(nil, "b")
+		lb.Add(nil, "c")
 		lb.Remove("b")
 		a, b, c := 0, 0, 0
 		for i := 0; i < 2000; i++ {
-			v := lb.Select()
+			v := lb.Select(nil)
 			//t.Log(v)
 			if v.(string) == "a" {
 				a++
@@ -129,7 +129,7 @@ func TestRandomWeightLB(t *testing.T) {
 		lb.Add(10, "c")
 		a, b, c := 0, 0, 0
 		for i := 0; i < 17000; i++ {
-			v := lb.Select()
+			v := lb.Select(nil)
 			//t.Log(v)
 			if v.(string) == "a" {
 				a++
@@ -151,7 +151,7 @@ func TestRandomWeightLB(t *testing.T) {
 		lb.Remove("b")
 		a, b, c := 0, 0, 0
 		for i := 0; i < 12000; i++ {
-			v := lb.Select()
+			v := lb.Select(nil)
 			//t.Log(v)
 			if v.(string) == "a" {
 				a++

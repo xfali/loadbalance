@@ -5,6 +5,8 @@
 
 package loadbalance
 
+import "context"
+
 type RoundRobbinLoadBalance struct {
 	BaseLoadBalance
 	i int
@@ -17,7 +19,7 @@ func NewRoundRobbinLoadBalance() *RoundRobbinLoadBalance {
 	}
 }
 
-func (lb *RoundRobbinLoadBalance) Select() interface{} {
+func (lb *RoundRobbinLoadBalance) Select(ctx context.Context) interface{} {
 	lb.lock.RLock()
 	defer lb.lock.RUnlock()
 
@@ -32,7 +34,7 @@ func (lb *RoundRobbinLoadBalance) Select() interface{} {
 }
 
 type weightInvoker struct {
-	weight  uint
+	weight  int
 	curW    int64
 	invoker interface{}
 }
@@ -54,12 +56,12 @@ func (lb *RoundRobbinWeightLoadBalance) WithLocker(locker RWLocker) {
 	lb.lock = locker
 }
 
-func (lb *RoundRobbinWeightLoadBalance) Add(weight uint, invoker interface{}) {
+func (lb *RoundRobbinWeightLoadBalance) Add(weight interface{}, invoker interface{}) {
 	lb.lock.Lock()
 	defer lb.lock.Unlock()
 
 	lb.invokers = append(lb.invokers, weightInvoker{
-		weight:  weight,
+		weight:  weight.(int),
 		curW:    0,
 		invoker: invoker,
 	})
@@ -81,7 +83,7 @@ func (lb *RoundRobbinWeightLoadBalance) Remove(invoker interface{}) {
 	}
 }
 
-func (lb *RoundRobbinWeightLoadBalance) Select() interface{} {
+func (lb *RoundRobbinWeightLoadBalance) Select(ctx context.Context) interface{} {
 	lb.lock.RLock()
 	defer lb.lock.RUnlock()
 
