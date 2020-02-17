@@ -19,13 +19,24 @@ loadbalance实现了常用的负载均衡算法：
 ## 使用
 
 
-### 1、初始化
+### 1、直接创建
 ```cassandraql
 lb := loadbalance.NewRoundRobbinLoadBalance()
 		lb.Add(1, "a")
 		lb.Add(1, "b")
 		lb.Add(1, "c")
 		for i := 0; i < 10; i++ {
+			t.Log(lb.Select(nil))
+		}
+```
+
+### 1、使用factory
+```cassandraql
+lb := loadbalance.Create(loadbalance.LBRoundRobbin)
+		lb.Add(2, "a")
+		lb.Add(5, "b")
+		lb.Add(10, "c")
+		for i := 0; i < 17; i++ {
 			t.Log(lb.Select(nil))
 		}
 ```
